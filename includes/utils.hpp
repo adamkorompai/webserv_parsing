@@ -25,15 +25,6 @@ typedef std::map<std::string, std::map<std::string, std::vector<std::string> > >
 typedef std::map<std::string, std::vector<std::string> >::iterator map_vector_it;
 typedef std::map<std::string, std::vector<std::string> > map_vector;
 
-void    trim(std::string& string, std::string value)
-{
-    size_t first = string.find_first_not_of(value);
-	string.erase(0, first);
-	size_t last = string.find_last_not_of(value);
-	size_t len = string.length() - (last - 1);
-	string.erase(last + 1, len);
-}
-
 class ServerConf
 {
     public:
@@ -57,6 +48,16 @@ class FileOpenException : public std::exception
         return "Error while openening file\n";
     }
 };
+
+void    trim(std::string& string, std::string value)
+{
+    size_t first = string.find_first_not_of(value);
+	string.erase(0, first);
+	size_t last = string.find_last_not_of(value);
+	size_t len = string.length() - (last - 1);
+	string.erase(last + 1, len);
+}
+
 
 std::string ft_to_string(int entier)
 {
@@ -100,11 +101,4 @@ int valid_vector_return_size(std::vector<std::string> vec)
     if ((vec.size() % 2) != 0 || (vec.size() == 0))
         return (0);
     return (1);
-}
-
-bool check_exist_server_data(map_vector server_data, std::string key)
-{
-    if (server_data.count(key) > 0)
-        return (true);
-    return (false);
 }

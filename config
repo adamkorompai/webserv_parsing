@@ -1,12 +1,12 @@
 server 
 {
-    listen 0.0.0.0:8080;
+    listen 0.0.0.0;
     server_name 127.0.0.1;
 
-    root ./public;
+    root ./eval;
     index index.html;
 
-    client_max_body_size 2G;
+    client_max_body_size 2g;
 
     location / {
         allow_methods [GET];

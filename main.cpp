@@ -31,6 +31,7 @@ class Config
         int     valid_return_status(Data &g_Data, std::string status);
         void    check_autoindex_location(Data &wbsv_data, map_vector_it location_data_it);
         void    set_default(Data &wbsv_data);
+        void    printData(ServerConf server);
 };
 
 class Data
@@ -42,6 +43,19 @@ class Data
         std::string error;
 };
 
+
+void    Config::printData(ServerConf server)
+{
+        for (map_vector_it server_data_it = server.server_data.begin(); server_data_it != server.server_data.end(); ++server_data_it)
+        {
+            std::cout << "Key: " << server_data_it->first << " Value :";
+            for (std::vector<std::string>::iterator value_it = server_data_it->second.begin(); value_it != server_data_it->second.end(); value_it++)
+            {
+                std::cout << " " << *value_it;           
+            }
+            std::cout << std::endl;
+        }
+}
 
 void    Config::parsing_file(std::string file, Data &wbsv_data)
 {
@@ -103,16 +117,18 @@ void    Config::getData(Data &wbsv_data)
         check_validity(wbsv_data);
     }
     else {
-        wbsv_data.error = "WebServer: [emerg] error in syntax missing of '{' or '}' in configfile.conf";
+        wbsv_data.error = "Webserv: error in syntax missing of '{' or '}' in configfile.conf";
     }
 }
 
 void    Config::check_validity(Data &wbsv_data)
 {
+    //printData(wbsv_data);
     if (!wbsv_data.error.length())
     {
         server_data(wbsv_data);
         server_location(wbsv_data);
+        set_default(wbsv_data);
     }
 }
 
@@ -135,9 +151,9 @@ void    Config::set_default(Data &wbsv_data)
             it->server_data.insert(std::make_pair("error_page",vector_value));
         }
         if (!check_exist_server_data(it->server_data, "listen"))
-            wbsv_data.error = "WebServer: [emerg] need to define listen directive in the " + this->filename;
+            wbsv_data.error = "Webserv: need to define listen directive in the " + this->filename;
         if (!check_exist_server_data(it->server_data, "root"))
-            wbsv_data.error = "WebServer: [emerg] need to define root directive in the " + this->filename;
+            wbsv_data.error = "Webserv: need to define root directive in the " + this->filename;
         if (!check_exist_server_data(it->server_data, "index")) {
             vector_value.clear();
             vector_value.push_back("index.html");
@@ -174,7 +190,7 @@ void    Config::server_location(Data &wbsv_data)
                     else if (location_data_it->first == "fastcgi_pass")
                         check_one_arg(wbsv_data, location_data_it);
                     else {
-                        wbsv_data.error = "WebServer: [emerg] unknown directive \"" + location_data_it->first + "\" in ";
+                        wbsv_data.error = "Webserv: unknown directive \"" + location_data_it->first + "\" in ";
                         wbsv_data.error += this->filename;
                     }
                 }
@@ -186,12 +202,12 @@ void    Config::server_location(Data &wbsv_data)
 void    Config::check_autoindex_location(Data &wbsv_data, map_vector_it location_data_it)
 {
     if (!valid_vector_size(location_data_it->second, 1)) {
-        wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"" + location_data_it->first;
+        wbsv_data.error = "Webserv: invalid number of arguments in \"" + location_data_it->first;
         wbsv_data.error += "\" in " + this->filename;
     }
     else {
         if (*(location_data_it->second.begin()) != "on" && *(location_data_it->second.begin()) != "off") {
-            wbsv_data.error = "WebServer: [emerg] invalid value \"" + *(location_data_it->second.begin()) + "\" in \"autoindex\" directive, it must be \"on\" or \"off\" in ";
+            wbsv_data.error = "Webserv: invalid value \"" + *(location_data_it->second.begin()) + "\" in \"autoindex\" directive, it must be \"on\" or \"off\" in ";
             wbsv_data.error += this->filename;
         }
     }
@@ -202,7 +218,7 @@ void    Config::check_return_location(Data &wbsv_data, map_vector_it location_da
     int index = 0;
     
     if (!valid_vector_return_size(location_data_it->second)) {
-        wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"" + location_data_it->first;
+        wbsv_data.error = "Webserv: invalid number of arguments in \"" + location_data_it->first;
         wbsv_data.error += "\" in " + this->filename;
     }
     else {
@@ -210,7 +226,7 @@ void    Config::check_return_location(Data &wbsv_data, map_vector_it location_da
             index++;
             if (index % 2) {
                 if (!valid_return_status(wbsv_data, *value_it)) {
-                    wbsv_data.error = "WebServer: [emerg] invalid return code \"" + *value_it;
+                    wbsv_data.error = "Webserv: invalid return code \"" + *value_it;
                     wbsv_data.error += "\" in " + this->filename;
                 }
             }
@@ -223,7 +239,7 @@ int Config::valid_return_status(Data &wbsv_data, std::string status)
     int number = std::atoi(status.c_str());
     if (number >= 300 && number <= 399)
         return (1);
-    wbsv_data.error = "WebServer: [emerg] invalid return code \"" + status + "\" in ";
+    wbsv_data.error = "Webserv: invalid return code \"" + status + "\" in ";
     wbsv_data.error += this->filename;
     return (0);
 }
@@ -234,7 +250,7 @@ void    Config::check_allow_method(Data &wbsv_data, map_vector_it location_data_
         if (*value_it == "GET" || *value_it == "POST" || *value_it == "DELETE")
             continue;
         else {
-            wbsv_data.error = "WebServer: [emerg] invalid arguments \"" + *value_it + "\" in allow_methods in " + this->filename;
+            wbsv_data.error = "Webserv: invalid arguments \"" + *value_it + "\" in allow_methods in " + this->filename;
         }
     }
 }
@@ -247,7 +263,7 @@ void    Config::server_data(Data &wbsv_data)
     {
         for (map_vector_it server_data_it = it->server_data.begin(); server_data_it != it->server_data.end() && !wbsv_data.error.length(); ++server_data_it)
         {
-            for (std::vector<std::string>::iterator value_it = server_data_it->second.begin(); value_it != server_data_it->second.end() && wbsv_data.error.length(); value_it++)
+            for (std::vector<std::string>::iterator value_it = server_data_it->second.begin(); value_it != server_data_it->second.end() && !wbsv_data.error.length(); value_it++)
             {
                 if (server_data_it->first == "listen")
                     valid_listen(wbsv_data, (*value_it));
@@ -265,7 +281,7 @@ void    Config::server_data(Data &wbsv_data)
 void    Config::check_one_arg(Data &wbsv_data, map_vector_it server_data_it)
 {
     if (!valid_vector_size(server_data_it->second, 1)) {
-        wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"" + server_data_it->first;
+        wbsv_data.error = "Webserv: invalid number of arguments in \"" + server_data_it->first;
         wbsv_data.error += "\" in " + this->filename;
     }
 }
@@ -285,19 +301,19 @@ void    Config::valid_body(Data &wbsv_data, map_vector_it server_data_it)
                 number.erase((*value_it).length() - 1, 1);
                 index = number.find_first_not_of("0123456789");
                 if (index != -1) {
-                    wbsv_data.error = "WebServer: [emerg] \"" + server_data_it->first + "\" directive invalid value in ";
+                    wbsv_data.error = "Webserv: \"" + server_data_it->first + "\" directive invalid value in ";
                     wbsv_data.error += this->filename;
                 }
                 else
                     convert_body_size(*value_it, number, type);
             }
             else {
-                wbsv_data.error = "WebServer: [emerg] \"" + server_data_it->first + "\" directive invalid value in ";
+                wbsv_data.error = "Webserv: \"" + server_data_it->first + "\" directive invalid value in ";
                 wbsv_data.error += this->filename;
             }
     }
     else {
-        wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"" + server_data_it->first;
+        wbsv_data.error = "Webserv: invalid number of arguments in \"" + server_data_it->first;
         wbsv_data.error += "\" in " + this->filename;
     }
 }
@@ -313,9 +329,9 @@ void    Config::valid_listen(Data &wbsv_data, std::string value)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
     status = value.find_first_not_of(IP_NUM);
-    if (status == -1)
+    if (status != -1)
     {
-        wbsv_data.error = "WebServer: [emerg] host not found in \"";
+        wbsv_data.error = "Webserv: lol host not found in \"";
         wbsv_data.error += value + "\" of the \"listen\" directive in " + this->filename;
     }
     else if ((status = value.find(":")) != -1)
@@ -324,7 +340,7 @@ void    Config::valid_listen(Data &wbsv_data, std::string value)
         port = value.substr(value.find(":") + 1, value.length() - 1);
         if (getaddrinfo(host.c_str(), port.c_str(), &hints, &res) != 0)
         {
-            wbsv_data.error = "WebServer: [emerg] host not found in \"" + value + "\" of the \"listen\" directive in ";
+            wbsv_data.error = "Webserv: host not found in \"" + value + "\" of the \"listen\" directive in ";
             wbsv_data.error += this->filename;
         }
     }
@@ -332,7 +348,7 @@ void    Config::valid_listen(Data &wbsv_data, std::string value)
     {
         if (getaddrinfo(value.c_str(), NULL, &hints, &res) != 0)
         {
-            wbsv_data.error = "WebServer: [emerg] host not found in \"" + value + "\" of the \"listen\" directive in ";
+            wbsv_data.error = "Webserv: host not found in \"" + value + "\" of the \"listen\" directive in ";
             wbsv_data.error += this->filename;
         }
     }
@@ -340,7 +356,7 @@ void    Config::valid_listen(Data &wbsv_data, std::string value)
     {
         if (getaddrinfo(NULL, value.c_str(), &hints, &res) != 0)
         {
-            wbsv_data.error = "WebServer: [emerg] host not found in \"" + value + "\" of the \"listen\" directive in ";
+            wbsv_data.error = "Webserv: host not found in \"" + value + "\" of the \"listen\" directive in ";
             wbsv_data.error += this->filename;
         }
     }
@@ -364,7 +380,7 @@ void    Config::server_block(Utils utils, Data &wbsv_data)
             utils.index = utils.line.find(' ');
             if (utils.index == -1)
             {
-                wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"";
+                wbsv_data.error = "Webserv: invalid number of arguments in \"";
                 wbsv_data.error += utils.line + "\" directive in " + this->filename + ':' + ft_to_string(this->line_index);
                 break;
             }
@@ -383,16 +399,16 @@ void    Config::server_block(Utils utils, Data &wbsv_data)
 void    Config::ft_error_server_block(Data &wbsv_data, Utils utils, std::string filename, int line_index)
 {
     if (utils.key == "{"){
-        wbsv_data.error = "WebServer: [emerg] unexpected \"{\" in ";
+        wbsv_data.error = "Webserv: unexpected \"{\" in ";
         wbsv_data.error += filename + ':' + ft_to_string(line_index);
     }
     else if (utils.key != "server")
     {
-        wbsv_data.error = "WebServer: [emerg] unknown directive \"";
+        wbsv_data.error = "Webserv: unknown directive \"";
         wbsv_data.error += utils.key + "\" in " + filename + ':' + ft_to_string(line_index);
     }
     else {
-        wbsv_data.error = "WebServer: [emerg] directive \"server\" has no opening \"{\" in ";
+        wbsv_data.error = "Webserv: directive \"server\" has no opening \"{\" in ";
         wbsv_data.error += filename + ':' + ft_to_string(line_index);
     }
 }
@@ -452,7 +468,7 @@ void    Config::location(ServerConf &server, Data &wbsv_data, Utils utils)
                 break;
             utils.index = utils.line.find(" ");
             if(utils.index == -1) {
-                wbsv_data.error = "WebServer: [emerg] invalida number of arguments in \"";
+                wbsv_data.error = "Webserv: invalida number of arguments in \"";
                 wbsv_data.error += utils.line + "\" directive in " + this->filename + ':' + ft_to_string(this->line_index);
             }
             else {
@@ -498,7 +514,7 @@ void    Config::key_value_error_page(ServerConf &server, Data &wbsv_data, Utils 
         if (variable.length() && (variable.find_first_not_of(NUM) == std::string::npos) && valid_error_page(wbsv_data, variable))
             server.server_data[utils.key].push_back(variable);
         else if (!wbsv_data.error.length()){
-            wbsv_data.error = "WebServer: [emerg] invalid value \"" + variable + "\" in ";
+            wbsv_data.error = "Webserv: invalid value \"" + variable + "\" in ";
             wbsv_data.error += this->filename + ':' + ft_to_string(this->line_index);
         }
         utils.value.erase(0, utils.index + 1);
@@ -507,12 +523,12 @@ void    Config::key_value_error_page(ServerConf &server, Data &wbsv_data, Utils 
     trim(utils.value, " \t;");
     if (!utils.value.length() || !find_error)
     {
-        wbsv_data.error = "WebServer: [emerg] invalid number of arguments in \"";
+        wbsv_data.error = "Webserv: invalid number of arguments in \"";
         wbsv_data.error += utils.key + "\" directive in " + this->filename + ':' + ft_to_string(this->line_index);
     }
     else if (utils.value.find(".html") == std::string::npos)\
     {
-        wbsv_data.error = "WebServer: [emerg] " + utils.value + " is not a error file ('file.html') in \"";
+        wbsv_data.error = "Webserv: " + utils.value + " is not a error file ('file.html') in \"";
         wbsv_data.error += this->filename + ':' + ft_to_string(this->line_index);
     }
     else
@@ -524,7 +540,7 @@ int     Config::valid_error_page(Data &wbsv_data, std::string error)
     int number = std::atoi(error.c_str());
     if (number >= 300 && number <= 599)
         return (1);
-    wbsv_data.error = "WebServer: [emerg] value \"" + error + "\" must be between 300 and 599 in ";
+    wbsv_data.error = "Webserv: value \"" + error + "\" must be between 300 and 599 in ";
     wbsv_data.error += this->filename + ':' + ft_to_string(this->line_index);
     return (0);
 }
@@ -551,7 +567,7 @@ void    Config::check_semicolons(Utils &utils, Data &wbsv_data)
 {
     if (utils.key != "location" && utils.value.find_first_of(";") != (utils.value.length() - 1))
     {
-        wbsv_data.error = "WebServer: [emerg] directive \"";
+        wbsv_data.error = "Webserv: directive \"";
         wbsv_data.error += utils.key + "\" is not terminated by \";\" in " + this->filename + ':' + ft_to_string(this->line_index);
     }
     else
@@ -588,7 +604,7 @@ bool    Config::check_brackets(Data &wbsv_data)
     this->_infile.seekg(0, std::ios::beg);
     if (!brace_stack.empty())
     {
-        wbsv_data.error = "WebServer: [emerg] unexpected end of file, expecting\"}\" in ";
+        wbsv_data.error = "Webserv: unexpected end of file, expecting\"}\" in ";
         wbsv_data.error += this->filename + ':' + ft_to_string(line_index);
     }
     return brace_stack.empty();
@@ -600,11 +616,9 @@ int main(int ac, char **av)
 
 
     if (ac != 2)
-    {
-        std::cout << "Error: 2 arguments needed\n";
-        return 0;
-    }
-    wbsv_data.config.parsing_file(av[1], wbsv_data);
+        wbsv_data.config.parsing_file("config", wbsv_data);
+    else if (ac == 2)
+        wbsv_data.config.parsing_file(av[1], wbsv_data);
     if (!wbsv_data.error.empty())
     {
         std::cout << RED << wbsv_data.error << END_CLR << std::endl;

@@ -1,0 +1,8 @@
+listen ----> port and host.
+client_max_body_size ----> maximum allowed size for the client request body.
+root ----> the base directory from which the server will look for files when handling requests for static content like HMTL files.
+index ----> define the order of preference for index files within a directory.
+error_page ----> specify for HTTP_STATUS_CODE how to handle it and which page to redirect to.
+
+
+location ---> how the server should handle specific types of requests based on the request's URL
